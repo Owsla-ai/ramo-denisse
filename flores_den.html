@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ramo para Denisse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#fff7d9;--accent:#f6c542;--dark:#3b2f2f}
+    html,body{height:100%;margin:0;font-family:Poppins,system-ui,Segoe UI,Arial}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#fff 0%,#fff7d9 100%)}
+    .card{width:900px;max-width:95vw;background:linear-gradient(180deg,#fff 0%,#fffdf6 100%);border-radius:18px;box-shadow:0 8px 30px rgba(18,15,20,0.08);padding:18px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{font-family:'Great Vibes',cursive;margin:0;font-size:48px;color:var(--dark);text-shadow:0 2px 0 rgba(0,0,0,0.03)}
+    p{margin:0;color:#6b5e5e}
+    .canvas-wrap{display:flex;gap:18px;align-items:flex-start}
+    svg{flex:1;border-radius:10px;background:linear-gradient(180deg,#fefbe7, #fff9e0);box-shadow:inset 0 -40px 80px rgba(0,0,0,0.02)}
+    .controls{width:240px}
+    label{display:block;margin:10px 0 6px;font-size:13px;color:#5a4c4c}
+    input[type=range]{width:100%}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--dark);color:#fff;text-decoration:none;cursor:pointer;border:none}
+    .small{font-size:13px;color:#6b5e5e;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>para Denisse</h1>
+        <p class="small">FELIZ 21  DE SEPTIEMBRE</p>
+      </header>
+
+      <div style="height:18px"></div>
+
+      <div class="canvas-wrap">
+        <svg id="art" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-label="Ramo para Denisse">
+          <defs>
+            <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000" flood-opacity="0.12"/>
+            </filter>
+          </defs>
+
+          <!-- fondo suave -->
+          <rect x="0" y="0" width="900" height="600" fill="url(#g1)" opacity="0.9"></rect>
+
+          <!-- group where flowers will be placed -->
+          <g id="bouquet" transform="translate(0,0)"></g>
+
+          <!-- wrapper / paper -->
+          <g id="wrapper">
+            <path id="paper" d="M200 420 C150 460, 130 520, 220 560 L680 560 C760 520,740 460,700 420 L560 480 L340 480 Z" fill="#f2d8a8" stroke="#e0b85a" stroke-width="2" filter="url(#softShadow)" opacity="0.95"/>
+            <!-- ribbon -->
+            <ellipse cx="450" cy="520" rx="44" ry="14" fill="#e76f3c"/>
+            <path d="M430 515 C410 490,410 470,430 460" fill="#e76f3c"/>
+            <path d="M470 515 C490 490,490 470,470 460" fill="#e76f3c"/>
+          </g>
+
+          <!-- name -->
+          <text id="nameText" x="450" y="100" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="64" fill="#3b2f2f">Denisse</text>
+
+        </svg>
+
+        <div class="controls">
+          <label>Tamaño general: <span id="scaleVal">1.0</span>x</label>
+          <input type="range" id="scale" min="0.7" max="1.4" step="0.05" value="1">
+
+          <label>Variación (aleatorio)</label>
+          <button class="btn" id="regen">Regenerar ramo</button>
+
+          <label>Descargar imagen</label>
+          <button class="btn" id="download">Descargar PNG</button>
+
+          <div class="small">Tip: cambia el tamaño y presiona "Regenerar" para una composición nueva.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById('art');
+    const bouquet = document.getElementById('bouquet');
+    const scaleInput = document.getElementById('scale');
+    const scaleVal = document.getElementById('scaleVal');
+
+    // util: crea un nodo SVG
+    function svgEl(tag, attrs={}){
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for(const k in attrs){ el.setAttribute(k, attrs[k]); }
+      return el;
+    }
+
+    // crear girasol: centro marrón y muchos pétalos amarillos
+    function createSunflower(cx, cy, s=1, rotation=0){
+      const g = svgEl('g', {transform:`translate(${cx},${cy}) scale(${s}) rotate(${rotation})`});
+      // pétalos
+      for(let i=0;i<18;i++){
+        const ang = i*(360/18);
+        const pet = svgEl('ellipse', {cx:0, cy:-46, rx:12, ry:26, transform:`rotate(${ang})`, fill:'#f6c542', opacity:0.98});
+        g.appendChild(pet);
+      }
+      // centro
+      const center = svgEl('circle', {cx:0, cy:0, r:28, fill:'#70422b'});
+      const center2 = svgEl('circle', {cx:0, cy:0, r:20, fill:'#3d2b20', opacity:0.9});
+      g.appendChild(center);
+      g.appendChild(center2);
+      // stem
+      const stem = svgEl('rect', {x:-4, y:28, width:8, height:140, rx:4, fill:'#5a8a3b', transform:'translate(0,0)'});
+      g.appendChild(stem);
+      return g;
+    }
+
+    // crear flor amarilla simple
+    function createYellowFlower(cx, cy, s=1, rotation=0){
+      const g = svgEl('g', {transform:`translate(${cx},${cy}) scale(${s}) rotate(${rotation})`});
+      for(let i=0;i<10;i++){
+        const ang = i*(360/10);
+        const pet = svgEl('path', {d:'M0 -26 Q10 -14 0 0 Q-10 -14 0 -26 Z', transform:`rotate(${ang})`, fill:'#fcd86a'});
+        g.appendChild(pet);
+      }
+      const center = svgEl('circle', {cx:0, cy:0, r:8, fill:'#c37d1f'});
+      g.appendChild(center);
+      const stem = svgEl('rect', {x:-3, y:12, width:6, height:110, rx:3, fill:'#5a8a3b'});
+      g.appendChild(stem);
+      return g;
+    }
+
+    // crear ramito
+    function generateBouquet(seed){
+      while(bouquet.firstChild) bouquet.removeChild(bouquet.firstChild);
+      const rng = mulberry32(seed || Math.floor(Math.random()*1e9));
+
+      // add some sunflowers
+      const baseX = 450;
+      const baseY = 240;
+      const mainSunCount = 3;
+      for(let i=0;i<mainSunCount;i++){
+        const dx = (i-1)*90 + (rng()*40-20);
+        const dy = -Math.abs(i-1)*20 + (rng()*40-20);
+        const s = 0.9 + rng()*0.3;
+        const rot = (rng()*20-10);
+        const sf = createSunflower(baseX+dx, baseY+dy, s, rot);
+        bouquet.appendChild(sf);
+      }
+
+      // add yellow fillers
+      for(let i=0;i<8;i++){
+        const dx = (rng()*400)+150;
+        const dy = (rng()*120)-50;
+        const s = 0.5 + rng()*0.5;
+        const rot = rng()*60-30;
+        const yf = createYellowFlower(baseX-250+dx, baseY+dy, s, rot);
+        bouquet.appendChild(yf);
+      }
+
+      // small decorative leaves
+      for(let i=0;i<6;i++){
+        const leaf = svgEl('ellipse', {cx:100+rng()*700, cy:380 + rng()*40, rx:24, ry:10, fill:'#6aa05a', transform:`rotate(${rng()*60-30})`, opacity:0.95});
+        bouquet.appendChild(leaf);
+      }
+
+      // bring wrapper to front
+      const wrapper = document.getElementById('wrapper');
+      svg.appendChild(wrapper);
+
+      // name style
+      const name = document.getElementById('nameText');
+      name.setAttribute('font-size', 64 * (1 + (rng()-0.5)*0.08));
+      name.setAttribute('y', 90 + (rng()*20-10));
+    }
+
+    // seeded RNG
+    function mulberry32(a){
+      return function(){
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+    }
+
+    // initial draw
+    generateBouquet();
+
+    // controls
+    document.getElementById('regen').addEventListener('click', ()=>{
+      generateBouquet(Math.floor(Math.random()*1e9));
+    });
+
+    scaleInput.addEventListener('input', ()=>{
+      const s = parseFloat(scaleInput.value);
+      scaleVal.textContent = s.toFixed(2);
+      svg.setAttribute('viewBox', `${450-450/s} ${300-300/s} ${900/s} ${600/s}`);
+    });
+
+    // download function: svg -> canvas -> png
+    document.getElementById('download').addEventListener('click', async ()=>{
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svg);
+      const svgBlob = new Blob([source], {type:'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = function(){
+        const c = document.createElement('canvas');
+        c.width = 1800; c.height = 1200; // high res
+        const ctx = c.getContext('2d');
+        // white background
+        ctx.fillStyle = '#fffdf6'; ctx.fillRect(0,0,c.width,c.height);
+        ctx.drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function(blob){
+          const a = document.createElement('a');
+          a.download = 'ramo_denisse.png';
+          a.href = URL.createObjectURL(blob);
+          a.click();
+        });
+      }
+      img.src = url;
+    });
+
+  </script>
+</body>
+</html>
